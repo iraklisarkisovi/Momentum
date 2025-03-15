@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import Header from "./Header";
 import { useQuery } from "@tanstack/react-query";
 import { FetchProperties, FetchTasks } from "../api/REST";
 import { fredoka } from "..";
 import { format } from "date-fns";
 import { ka } from "date-fns/locale";
+import pluralize from "pluralize";
 
 const Stats = [
   { name: "დასაწყები", color: "#F7BC30" },
@@ -27,7 +28,9 @@ type Task = {
   due_date: string;
   priority: { name: string; icon?: string };
   status: { name: string };
-  employee: { name: string; avatar: string };
+  employee: {
+    surname: string; name: string; avatar: string 
+};
   department: { name: string };
   total_comments: number;
 };
@@ -47,23 +50,29 @@ const Main: React.FC = () => {
     console.log(option, selectedDepartments);
   }, [option, selectedDepartments]);
 
-  const [activeFilter, setActiveFilter] = useState<
-    "department" | "priority" | "employee" | null
-  >(null);
+  const [activeFilter, setActiveFilter] = useState<"departments" | "priorities" | "employees" | null>(null)
 
-  const toggleFilter = (
-    filter: "department" | "priority" | "employee",
-    name: string
-  ) => {
-    setActiveFilter((prev) => (prev === filter ? null : filter));
-    setDepartment(filter === "department");
-    setPriority(filter === "priority");
-    setEmployee(filter === "employee");
-    {
-      (department || priority || employee) && setAll((prop) => !prop);
-    }
-    setOption(name);
-  };
+const toggleFilter = (
+  filter: "department" | "priority" | "employee",
+  name: string
+) => {
+
+  const convert = pluralize.plural(filter) as
+    | "departments"
+    | "priorities"
+    | "employees";
+  console.log(convert)
+  
+  setActiveFilter((prev) => (prev === convert ? null : convert));
+
+  setDepartment(convert === "departments" && activeFilter !== "departments");
+  setPriority(convert === "priorities" && activeFilter !== "priorities");
+  setEmployee(convert === "employees" && activeFilter !== "employees"); 
+
+  setAll(activeFilter === convert ? false : true);
+  setOption(name);
+};
+
 
   const [tasksByStatus, setTasksByStatus] = useState<{ [key: string]: Task[] }>(
     {}
@@ -91,29 +100,43 @@ const Main: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!data) return;
-
-    const filterKey =
-      activeFilter === "department"
-        ? "department"
-        : activeFilter === "priority"
-        ? "priority"
-        : activeFilter === "employee"
-        ? "employee"
+    const kk: any =
+      activeFilter === "departments" ||
+      activeFilter === "priorities" ||
+      activeFilter === "employees"
+        ? activeFilter
         : null;
+    setOption(kk);
+  }, [option]);
 
+  useEffect(() => {
+    if (data2 && Array.isArray(data2)) {
+      setDepartments(data2);
+    }
+  }, [data2]);
+
+  const FilterTasks = () => {
+    if (!data) return console.log("No data available");
+
+    console.log("Active Filter:", activeFilter);
+    console.log("Selected Departments:", selectedDepartments);
+    const singularOption = pluralize.singular(option)
+    
     const filteredTasks =
-      filterKey && selectedDepartments.length
+      option && selectedDepartments.length > 0
         ? data.filter(
             (task) =>
-              task[filterKey as keyof Task] &&
-              "id" in task[filterKey as keyof Task] &&
+              task[singularOption as keyof Task] &&
+              "id" in task[singularOption as keyof Task] &&
               selectedDepartments.includes(
-                (task[filterKey as keyof Task] as { id: number }).id
+                (task[singularOption as keyof Task] as { id: number }).id
               )
           )
         : data;
 
+    console.log("Filtered Tasks:", filteredTasks);
+
+    console.log(tasksByStatus);
     const groupedTasks = filteredTasks.reduce(
       (acc: { [key: string]: Task[] }, item: Task) => {
         const status = item.status.name;
@@ -124,30 +147,28 @@ const Main: React.FC = () => {
       {}
     );
 
-    setTasksByStatus(groupedTasks);
-  }, [data, selectedDepartments, activeFilter]);
+    setTasksByStatus((prev) => groupedTasks || prev);
+  };
 
   useEffect(() => {
-    if (data2 && Array.isArray(data2)) {
-      setDepartments(data2);
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return console.log("No data or empty array", data);
     }
-  }, [data2]);
 
-  useEffect(() => {
-    if (!data) return;
+    console.log("Setting initial data:", data);
 
-    const groupedTasks = data?.reduce(
+    const initialTasksByStatus = data.reduce(
       (acc: { [key: string]: Task[] }, item: Task) => {
         const status = item.status.name;
         if (!acc[status]) acc[status] = [];
         acc[status].push(item);
         return acc;
       },
-      {}
+      { all: data }
     );
 
-    setTasksByStatus(groupedTasks);
-  }, [data, activeFilter]);
+    setTasksByStatus(initialTasksByStatus);
+  }, [data]);
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "d MMMM yyyy, HH:mm", { locale: ka });
@@ -155,7 +176,6 @@ const Main: React.FC = () => {
 
   if (error) return <h1>Oops! Something went wrong.</h1>;
   if (isLoading) return <h1>Loading...</h1>;
-
   return (
     <>
       <Header />
@@ -170,13 +190,17 @@ const Main: React.FC = () => {
               key={key}
               onClick={() => toggleFilter(key, KeyName)}
               className={`px-4 flex items-center text-[16px] gap-2 transition ${
-                key === activeFilter ? "text-[#8338EC]" : "text-black"
+                pluralize.plural(key) === activeFilter
+                  ? "text-[#8338EC]"
+                  : "text-black"
               }`}
             >
               <h1 className="font-sans">{name}</h1>
               <span
                 className={`width-[10px] ${
-                  key === activeFilter ? "text-[#8338EC]" : "text-black"
+                  pluralize.plural(key) === activeFilter
+                    ? "text-[#8338EC]"
+                    : "text-black"
                 }`}
               >
                 &#9662;
@@ -205,7 +229,10 @@ const Main: React.FC = () => {
           ) : (
             <h1>{option + " are not avaliable..."}</h1>
           )}
-          <button className="cursor-pointer w-[155px] ml-[450px] text-white rounded-[20px] px-[20px] py-[8px] transition-colors ease-out bg-[#8338EC] hover:bg-[#B588F4]">
+          <button
+            onClick={() => FilterTasks()}
+            className="cursor-pointer w-[155px] ml-[450px] text-white rounded-[20px] px-[20px] py-[8px] transition-colors ease-out bg-[#8338EC] hover:bg-[#B588F4]"
+          >
             არჩევა
           </button>
         </div>
@@ -224,68 +251,78 @@ const Main: React.FC = () => {
               </div>
 
               <div className="flex flex-col gap-5 items-center mb-10">
-                {tasksByStatus[name]?.map((item) => (
-                  <div
-                    key={item.id}
-                    className="mt-5 h-auto w-full border rounded-[15px] p-5"
-                    style={{ borderColor: color }}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div
-                        className="flex items-center gap-1 p-1 rounded-[5px] border"
-                        style={{ borderColor: "#FFBE0B", color: "#FFBE0B" }}
-                      >
-                        <img
-                          src={
-                            item.priority.icon ||
-                            "https://static.vecteezy.com/system/resources/previews/008/442/086/original/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg"
-                          }
-                          alt="priority-icon"
-                        />
-                        <h1>{item.priority.name}</h1>
+                {tasksByStatus[name]?.length > 0 ? (
+                  tasksByStatus[name]?.map((item) => (
+                    <div
+                      key={item.id}
+                      className="mt-5 h-auto w-full border rounded-[15px] p-5"
+                      style={{ borderColor: color }}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div
+                          className="flex items-center gap-1 p-1 rounded-[5px] border"
+                          style={{ borderColor: "#FFBE0B", color: "#FFBE0B" }}
+                        >
+                          <img
+                            src={
+                              item.priority.icon ||
+                              "https://static.vecteezy.com/system/resources/previews/008/442/086/original/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg"
+                            }
+                            alt="priority-icon"
+                          />
+                          <h1>{item.priority.name}</h1>
+                        </div>
+                        <h1
+                          className="font-mono text-[#212529]"
+                          style={{ fontFamily: fredoka.style.fontFamily }}
+                        >
+                          {formatDate(item.due_date)}
+                        </h1>
                       </div>
-                      <h1
-                        className="font-mono text-[#212529]"
-                        style={{ fontFamily: fredoka.style.fontFamily }}
-                      >
-                        {formatDate(item.due_date)}
-                      </h1>
-                    </div>
 
-                    <div className="mt-5 text-left">
-                      <h1 className="text-[17px] font-bold text-[#212529]">
-                        {item.name}
-                      </h1>
-                      <h1 className="text-[#343A40] text-[16px]">
-                        {item.description}
-                      </h1>
-                    </div>
+                      <div className="mt-5 text-left">
+                        <h1 className="text-[17px] font-bold text-[#212529]">
+                          {item.name}
+                        </h1>
+                        <h1 className="text-[#343A40] text-[16px]">
+                          {item.description}
+                        </h1>
+                      </div>
 
-                    <div className="flex justify-between items-center mt-5">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={item.employee.avatar}
-                          alt="employee-avatar"
-                          className="h-[31px] w-[31px] rounded-full"
-                        />
-                        <div className="flex flex-col text-left">
-                          <h1>{item.employee.name}</h1>
-                          <p className="text-sm text-[13px] text-neutral-600">
-                            {item.department.name}
-                          </p>
+                      <div className="flex justify-between items-center mt-5">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={item.employee.avatar}
+                            alt="employee-avatar"
+                            className="h-[31px] w-[31px] rounded-full"
+                          />
+                          <div className="flex flex-col text-left">
+                            <div className="flex flex-row gap-1">
+                              <h1>{item.employee.name}</h1>
+
+                              <h1>{item.employee.surname}</h1>
+                            </div>
+                            <p className="text-sm text-[13px] text-neutral-600">
+                              {item.department.name}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 cursor-pointer">
+                          <img
+                            src="https://img.icons8.com/?size=100&id=11167&format=png&color=000000"
+                            alt="comment"
+                            className="h-[22px] w-[22px]"
+                          />
+                          <h1>{item.total_comments}</h1>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 cursor-pointer">
-                        <img
-                          src="https://img.icons8.com/?size=100&id=11167&format=png&color=000000"
-                          alt="comment"
-                          className="h-[22px] w-[22px]"
-                        />
-                        <h1>{item.total_comments}</h1>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <>
+                    <h1>No data avaliable</h1>
+                  </>
+                )}
               </div>
             </div>
           ))}
