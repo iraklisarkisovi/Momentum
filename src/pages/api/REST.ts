@@ -4,7 +4,7 @@ import axios from "axios";
 export const client = new QueryClient();
 const ApiUrl = process.env.NEXT_PUBLIC_API;
 
-const instance = axios.create({
+export const instance = axios.create({
   baseURL: ApiUrl,
 });
 

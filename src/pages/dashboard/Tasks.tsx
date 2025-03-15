@@ -6,6 +6,7 @@ import { fredoka } from "..";
 import { format } from "date-fns";
 import { ka } from "date-fns/locale";
 import pluralize from "pluralize";
+import Registration from "./Registration";
 
 const Stats = [
   { name: "დასაწყები", color: "#F7BC30" },
@@ -36,15 +37,13 @@ type Task = {
 };
 
 const Main: React.FC = () => {
-  const [departments, setDepartments] = useState<
-    { id: number; name: string }[]
-  >([]);
+  const [departments, setDepartments] = useState<{ id: number; name: string }[]>([]);
   const [selectedDepartments, setSelectedDepartments] = useState<number[]>([]);
-  const [department, setDepartment] = useState(false);
-  const [priority, setPriority] = useState(false);
-  const [employee, setEmployee] = useState(false);
+ 
   const [all, setAll] = useState(false);
   const [option, setOption] = useState<string>("");
+
+  const [CandO, setCandO] = useState(false)
 
   useEffect(() => {
     console.log(option, selectedDepartments);
@@ -64,10 +63,6 @@ const toggleFilter = (
   console.log(convert)
   
   setActiveFilter((prev) => (prev === convert ? null : convert));
-
-  setDepartment(convert === "departments" && activeFilter !== "departments");
-  setPriority(convert === "priorities" && activeFilter !== "priorities");
-  setEmployee(convert === "employees" && activeFilter !== "employees"); 
 
   setAll(activeFilter === convert ? false : true);
   setOption(name);
@@ -178,6 +173,10 @@ const toggleFilter = (
   if (isLoading) return <h1>Loading...</h1>;
   return (
     <>
+      <div className="fixed z-10">
+        <Registration />
+      </div>
+
       <Header />
       <main className="flex flex-col items-start justify-start min-h-screen gap-5 px-5 md:px-10 text-[#212529]">
         <h1 className="text-[28px] md:text-[34px] md:ml-14">
@@ -320,7 +319,7 @@ const toggleFilter = (
                   ))
                 ) : (
                   <>
-                    <h1>No data avaliable</h1>
+                    <h1 className="text-xl mt-10">მონაცემები ვერ მოიძებნა</h1>
                   </>
                 )}
               </div>
