@@ -39,12 +39,9 @@ type Task = {
 const Main: React.FC = () => {
   const [departments, setDepartments] = useState<{ id: number; name: string }[]>([]);
   const [selectedDepartments, setSelectedDepartments] = useState<number[]>([]);
- 
   const [all, setAll] = useState(false);
   const [option, setOption] = useState<string>("");
-
-  const [CandO, setCandO] = useState(false)
-
+  
   useEffect(() => {
     console.log(option, selectedDepartments);
   }, [option, selectedDepartments]);
