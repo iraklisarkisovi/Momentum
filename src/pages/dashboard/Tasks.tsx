@@ -27,8 +27,8 @@ type Task = {
   name: string;
   description: string;
   due_date: string;
-  priority: { name: string; icon?: string };
-  status: { name: string };
+  priority: { name: string; icon?: string, id: number};
+  status: { name: string, id: number };
   employee: {
     surname: string; name: string; avatar: string 
 };
@@ -166,6 +166,12 @@ const toggleFilter = (
     return format(new Date(dateString), "d MMMM yyyy, HH:mm", { locale: ka });
   };
 
+  const colorPicker = (id: number) => {
+    if (id === 1) return "#08A508";
+    if (id === 2) return "#FFBE0B";
+    if (id === 3) return "#FA4D4D";   
+  }
+
   if (error) return <h1>Oops! Something went wrong.</h1>;
   if (isLoading) return <h1>Loading...</h1>;
   return (
@@ -248,72 +254,80 @@ const toggleFilter = (
 
               <div className="flex flex-col gap-5 items-center mb-10">
                 {tasksByStatus[name]?.length > 0 ? (
-                  tasksByStatus[name]?.map((item) => (
-                    <div
-                      key={item.id}
-                      className="mt-5 h-auto w-full border rounded-[15px] p-5"
-                      style={{ borderColor: color }}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div
-                          className="flex items-center gap-1 p-1 rounded-[5px] border"
-                          style={{ borderColor: "#FFBE0B", color: "#FFBE0B" }}
-                        >
-                          <img
-                            src={
-                              item.priority.icon ||
-                              "https://static.vecteezy.com/system/resources/previews/008/442/086/original/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg"
-                            }
-                            alt="priority-icon"
-                          />
-                          <h1>{item.priority.name}</h1>
+                  tasksByStatus[name]?.map((item) => {
+                    const pickColor = colorPicker(item.priority.id);
+
+                    console.log(pickColor)
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="mt-5 h-auto w-full border rounded-[15px] p-5"
+                        style={{ borderColor: color }}
+                      >
+                        <div className="flex justify-between items-center">
+                          <div
+                            className={`flex items-center gap-1 p-1 rounded-[5px]`}
+                            style={{
+                              border: `1px solid ${pickColor}`,
+                              color: `${pickColor}`,
+                            }}
+                          >
+                            <img
+                              src={
+                                item.priority.icon ||
+                                "https://static.vecteezy.com/system/resources/previews/008/442/086/original/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg"
+                              }
+                              alt="priority-icon"
+                            />
+                            <h1>{item.priority.name}</h1>
+                          </div>
+                          <h1
+                            className="font-mono text-[#212529]"
+                            style={{ fontFamily: fredoka.style.fontFamily }}
+                          >
+                            {formatDate(item.due_date)}
+                          </h1>
                         </div>
-                        <h1
-                          className="font-mono text-[#212529]"
-                          style={{ fontFamily: fredoka.style.fontFamily }}
-                        >
-                          {formatDate(item.due_date)}
-                        </h1>
-                      </div>
 
-                      <div className="mt-5 text-left">
-                        <h1 className="text-[17px] font-bold text-[#212529]">
-                          {item.name}
-                        </h1>
-                        <h1 className="text-[#343A40] text-[16px]">
-                          {item.description}
-                        </h1>
-                      </div>
+                        <div className="mt-5 text-left">
+                          <h1 className="text-[17px] font-bold text-[#212529]">
+                            {item.name}
+                          </h1>
+                          <h1 className="text-[#343A40] text-[16px]">
+                            {item.description}
+                          </h1>
+                        </div>
 
-                      <div className="flex justify-between items-center mt-5">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={item.employee.avatar}
-                            alt="employee-avatar"
-                            className="h-[31px] w-[31px] rounded-full"
-                          />
-                          <div className="flex flex-col text-left">
-                            <div className="flex flex-row gap-1">
-                              <h1>{item.employee.name}</h1>
+                        <div className="flex justify-between items-center mt-5">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={item.employee.avatar}
+                              alt="employee-avatar"
+                              className="h-[31px] w-[31px] rounded-full"
+                            />
+                            <div className="flex flex-col text-left">
+                              <div className="flex flex-row gap-1">
+                                <h1>{item.employee.name}</h1>
 
-                              <h1>{item.employee.surname}</h1>
+                                <h1>{item.employee.surname}</h1>
+                              </div>
+                              <p className="text-sm text-[13px] text-neutral-600">
+                                {item.department.name}
+                              </p>
                             </div>
-                            <p className="text-sm text-[13px] text-neutral-600">
-                              {item.department.name}
-                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 cursor-pointer">
+                            <img
+                              src="https://img.icons8.com/?size=100&id=11167&format=png&color=000000"
+                              alt="comment"
+                              className="h-[22px] w-[22px]"
+                            />
+                            <h1>{item.total_comments}</h1>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 cursor-pointer">
-                          <img
-                            src="https://img.icons8.com/?size=100&id=11167&format=png&color=000000"
-                            alt="comment"
-                            className="h-[22px] w-[22px]"
-                          />
-                          <h1>{item.total_comments}</h1>
-                        </div>
                       </div>
-                    </div>
-                  ))
+                    );})
                 ) : (
                   <>
                     <h1 className="text-xl mt-10">მონაცემები ვერ მოიძებნა</h1>
