@@ -1,12 +1,13 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import { useQuery } from "@tanstack/react-query";
 import { FetchProperties, FetchTasks } from "../api/REST";
 import { fredoka } from "..";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { ka } from "date-fns/locale";
 import pluralize from "pluralize";
 import Registration from "./Registration";
+import { useRouter } from "next/router";
 
 const Stats = [
   { name: "დასაწყები", color: "#F7BC30" },
@@ -21,7 +22,7 @@ const DropDowns = [
   { key: "employee", name: "თანამშრომელი", KeyName: "employees" },
 ] as const;
 
-type Task = {
+export type Task = {
   option: any;
   id: number;
   name: string;
@@ -36,12 +37,21 @@ type Task = {
   total_comments: number;
 };
 
+export const formatDate = (dateString: any) => {
+  const date = new Date(dateString);
+  if (!isValid(date)) {
+    return "Invalid Date";
+  }
+  return format(date, "d MMMM yyyy, HH:mm", { locale: ka });
+};
+
 const Main: React.FC = () => {
   const [departments, setDepartments] = useState<{ id: number; name: string }[]>([]);
   const [selectedDepartments, setSelectedDepartments] = useState<number[]>([]);
   const [all, setAll] = useState(false);
   const [option, setOption] = useState<string>("");
-  
+  const router = useRouter()
+
   useEffect(() => {
     console.log(option, selectedDepartments);
   }, [option, selectedDepartments]);
@@ -162,9 +172,7 @@ const toggleFilter = (
     setTasksByStatus(initialTasksByStatus);
   }, [data]);
 
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "d MMMM yyyy, HH:mm", { locale: ka });
-  };
+ 
 
   const colorPicker = (id: number) => {
     if (id === 1) return "#08A508";
@@ -255,8 +263,8 @@ const toggleFilter = (
               <div className="flex flex-col gap-5 items-center mb-10">
                 {tasksByStatus[name]?.length > 0 ? (
                   tasksByStatus[name]?.map((item) => {
-                    const pickColor = colorPicker(item.priority.id);
 
+                    const pickColor = colorPicker(item.priority.id);
                     console.log(pickColor)
 
                     return (
@@ -265,38 +273,42 @@ const toggleFilter = (
                         className="mt-5 h-auto w-full border rounded-[15px] p-5"
                         style={{ borderColor: color }}
                       >
-                        <div className="flex justify-between items-center">
+                        <div className="cursor-pointer" onClick={() => router.push(`/${item.id}`)}>
                           <div
-                            className={`flex items-center gap-1 p-1 rounded-[5px]`}
-                            style={{
-                              border: `1px solid ${pickColor}`,
-                              color: `${pickColor}`,
-                            }}
+                            className="flex justify-between items-center"
                           >
-                            <img
-                              src={
-                                item.priority.icon ||
-                                "https://static.vecteezy.com/system/resources/previews/008/442/086/original/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg"
-                              }
-                              alt="priority-icon"
-                            />
-                            <h1>{item.priority.name}</h1>
+                            <div
+                              className={`flex items-center gap-1 p-1 rounded-[5px]`}
+                              style={{
+                                border: `1px solid ${pickColor}`,
+                                color: `${pickColor}`,
+                              }}
+                            >
+                              <img
+                                src={
+                                  item.priority.icon ||
+                                  "https://static.vecteezy.com/system/resources/previews/008/442/086/original/illustration-of-human-icon-user-symbol-icon-modern-design-on-blank-background-free-vector.jpg"
+                                }
+                                alt="priority-icon"
+                              />
+                              <h1>{item.priority.name}</h1>
+                            </div>
+                            <h1
+                              className="font-mono text-[#212529]"
+                              style={{ fontFamily: fredoka.style.fontFamily }}
+                            >
+                              {formatDate(item.due_date)}
+                            </h1>
                           </div>
-                          <h1
-                            className="font-mono text-[#212529]"
-                            style={{ fontFamily: fredoka.style.fontFamily }}
-                          >
-                            {formatDate(item.due_date)}
-                          </h1>
-                        </div>
 
-                        <div className="mt-5 text-left">
-                          <h1 className="text-[17px] font-bold text-[#212529]">
-                            {item.name}
-                          </h1>
-                          <h1 className="text-[#343A40] text-[16px]">
-                            {item.description}
-                          </h1>
+                          <div className="mt-5 text-left">
+                            <h1 className="text-[17px] font-bold text-[#212529]">
+                              {item.name}
+                            </h1>
+                            <h1 className="text-[#343A40] text-[16px]">
+                              {item.description}
+                            </h1>
+                          </div>
                         </div>
 
                         <div className="flex justify-between items-center mt-5">

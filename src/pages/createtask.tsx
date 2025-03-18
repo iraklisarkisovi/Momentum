@@ -1,7 +1,8 @@
-import React, { useState, ChangeEvent, useEffect } from "react";
+import React, { useState, ChangeEvent, useEffect, useReducer } from "react";
 import Header from "./dashboard/Header";
 import Registration from "./dashboard/Registration";
 import { instance } from "./api/REST";
+import { useRouter } from "next/router";
 
 interface FormData {
   name: string;
@@ -34,6 +35,8 @@ const TaskCreation: React.FC = () => {
     employee_id: "",
     due_date: "",
   });
+
+  const router = useRouter()
 
   const [employees, setEmployees] = useState<OptionType[]>([]);
   const [departments, setDepartments] = useState<OptionType[]>([]);
@@ -80,10 +83,11 @@ const TaskCreation: React.FC = () => {
       }
 
       postTaskData()
+      router.push('/')
     }
   };
 
-  useEffect(() => {
+  useEffect(() => { 
     Promise.all([
       instance("/employees"),
       instance("/departments"),
