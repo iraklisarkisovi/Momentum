@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Header from './dashboard/Header'
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
-import { FetchTasks } from './api/REST';
+import { FetchComments, FetchProperties, FetchTasks, instance } from './api/REST';
 import { Task, formatDate } from './dashboard/Tasks';
 import { Deadline, Employee, Status } from './dashboard/Svgs';
 import { fredoka } from '.';
@@ -10,8 +10,11 @@ import { fredoka } from '.';
 const TaskInfo = () => {
   const router = useRouter()
   const { dynamic } = router.query;
-
+ 
   const [task, setTask] = useState<Task | undefined>();
+  const [Stat, setStat] = useState<{ name: string; id: number }[]>()
+  const [StatChange, setStatChange] = useState<number>()
+  const [HandleText, setHandleText] = useState<string>('')
   const [color, setColor] = useState<string>();
 
   const { data, error, isLoading } = useQuery<Task[] | undefined>({
@@ -21,8 +24,61 @@ const TaskInfo = () => {
     cacheTime: 1000 * 60 * 20,
   });
 
-  error && console.log(error)
-  isLoading && <h1>Loading...</h1>
+  const PostComment = async () => {
+    const postDat = {
+      text: HandleText,
+      author_avatar: "https://api.dicebear.com/9.x/thumbs/svg?seed=Chrome34.96.41.195",
+      author_nickname: "Pinkie",
+      parent_id: null
+    }
+    
+    try{
+      await instance.post(`tasks/${task?.id}/comments`, postDat)
+      refetch()
+    }catch(err) {
+      console.log(err)
+    }
+  }
+
+  const {
+    data: comments,
+    error: comerr,
+    isLoading: comload,
+    refetch
+  } = useQuery({
+    queryKey: ["comments"],
+    queryFn: () => FetchComments(task?.id),
+    enabled: !!task?.id && !!PostComment,
+    staleTime: 1000 * 60 * 10,
+    cacheTime: 1000 * 60 * 20,
+  });
+
+  useEffect(() => {
+    const PutReq = async () => {
+      try{
+        await instance.put(`tasks/${task?.id}`, { status_id: StatChange });
+        console.log('successly changed status')
+      }catch(err) {
+        console.log(err)
+      }
+    }
+
+    PutReq()
+  }, [StatChange])
+
+  useEffect(() => {
+    const FetchProperties = async () => {
+      const res = await instance.get("statuses");
+      return setStat(res.data.filter(
+      (prev: { name: string; id: number }) => prev.id !== task?.status.id
+    ));
+    };
+
+    FetchProperties();
+  }, [data]);
+
+  error && comerr && console.log(error)
+  isLoading && comload && <h1>Loading...</h1>
 
   useEffect(() => {
     const filteredData = data?.find((prev) => prev.id === Number(dynamic))
@@ -37,8 +93,6 @@ const TaskInfo = () => {
     setColor(colorPicker(filteredData?.priority.id));
     console.log(colorPicker(filteredData?.priority.id));
   }, [data])
-
-  
 
   return (
     <>
@@ -75,13 +129,16 @@ const TaskInfo = () => {
               </div>
               <select
                 name="department"
-                // onChange={(e) => setSelectedOption(Number(e.target.value))}
-                // value={selectedOption ?? ""}
-                className="p-[10px] w-[259px] h-[45px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+                onChange={(e) => setStatChange(Number(e.target.value))}
+                value={StatChange ?? ""}
+                className="p-[10px] w-[259px] h-[45px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#ADB5BD]"
               >
                 <option value="" hidden>
                   {task?.status.name}
                 </option>
+                {Stat?.map(({ id, name }) => (
+                  <option value={id}>{name}</option>
+                ))}
               </select>
             </div>
             <div className="flex flex-row gap-[70px] items-center justify-around">
@@ -127,16 +184,37 @@ const TaskInfo = () => {
           </div>
         </div>
 
-        <div className="w-[741px] flex flex-col items-center justify-center px-16 gap-5 py-10 text-[#212529] h-auto bg-[#DDD2FF] rounded-[10px] border-[0.3px] border-[#F8F3FEA6]">
+        <div className="w-[741px] flex flex-col px-16 gap-5 py-10 text-[#212529] h-auto bg-[#DDD2FF] rounded-[10px] border border-[#F8F3FEA6]">
           <textarea
             placeholder="დაწერე კომენტარი"
-            className="bg-[#FFFFFF] max-h-[200px] min-h-[60px] malign-text-top w-[651px] h-[135px] p-4 border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+            value={HandleText}
+            onChange={(e) => setHandleText(e.target.value)}
+            className="bg-white max-h-[200px] min-h-[60px] w-full h-[135px] p-4 border border-[#CED4DA] rounded-md focus:outline-none focus:border-2 focus:border-[#afafaf] resize-none"
           />
+
           <button
-            className="ml-auto cursor-pointer w-[155px] text-white rounded-[20px] px-[20px] py-[8px] transition-colors ease-out bg-[#8338EC] hover:bg-[#B588F4]"
+            onClick={PostComment}
+            className="self-end cursor-pointer w-[155px] text-white rounded-full px-5 py-2 transition-colors ease-out bg-[#8338EC] hover:bg-[#B588F4]"
           >
             არჩევა
           </button>
+          <div className="flex flex-col gap-10">
+            {comments?.map((item: any, idx: number) => (
+              <div key={idx} className="flex flex-col gap-1">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={item.author_avatar}
+                    alt="employee-avatar"
+                    className="h-[31px] w-[31px] rounded-full object-cover"
+                  />
+                  <div className="text-left">
+                    <h1 className="font-semibold">{item.author_nickname}</h1>
+                  </div>
+                </div>
+                <p className="text-left text-sm">{item.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </>

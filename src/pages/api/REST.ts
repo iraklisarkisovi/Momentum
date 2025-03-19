@@ -20,3 +20,8 @@ export const FetchProperties = async (Prop: string) => {
   const res = await instance.get(Prop);
   return res.data;
 };
+
+export const FetchComments = async (Prop: number | undefined) => {
+  const res = await instance.get(`tasks/${Prop}/comments`)
+  return res.data
+}

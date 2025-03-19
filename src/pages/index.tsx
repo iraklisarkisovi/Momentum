@@ -1,5 +1,6 @@
 import Tasks from "./dashboard/Tasks";
 import { Fredoka } from "next/font/google";
+import localFont from 'next/font/local';
 
 
 export const fredoka = Fredoka({ subsets: ["latin"] });

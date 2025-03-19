@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import { useQuery } from "@tanstack/react-query";
 import { FetchProperties, FetchTasks } from "../api/REST";
-import { fredoka } from "..";
 import { format, isValid } from "date-fns";
 import { ka } from "date-fns/locale";
 import pluralize from "pluralize";
 import Registration from "./Registration";
 import { useRouter } from "next/router";
+import { fredoka } from "..";
 
+ 
 const Stats = [
   { name: "დასაწყები", color: "#F7BC30" },
   { name: "პროგრესში", color: "#FB5607" },
@@ -265,7 +266,6 @@ const toggleFilter = (
                   tasksByStatus[name]?.map((item) => {
 
                     const pickColor = colorPicker(item.priority.id);
-                    console.log(pickColor)
 
                     return (
                       <div
@@ -273,10 +273,11 @@ const toggleFilter = (
                         className="mt-5 h-auto w-full border rounded-[15px] p-5"
                         style={{ borderColor: color }}
                       >
-                        <div className="cursor-pointer" onClick={() => router.push(`/${item.id}`)}>
-                          <div
-                            className="flex justify-between items-center"
-                          >
+                        <div
+                          className="cursor-pointer"
+                          onClick={() => router.push(`/${item.id}`)}
+                        >
+                          <div className="flex justify-between items-center">
                             <div
                               className={`flex items-center gap-1 p-1 rounded-[5px]`}
                               style={{
@@ -295,7 +296,6 @@ const toggleFilter = (
                             </div>
                             <h1
                               className="font-mono text-[#212529]"
-                              style={{ fontFamily: fredoka.style.fontFamily }}
                             >
                               {formatDate(item.due_date)}
                             </h1>
@@ -305,7 +305,7 @@ const toggleFilter = (
                             <h1 className="text-[17px] font-bold text-[#212529]">
                               {item.name}
                             </h1>
-                            <h1 className="text-[#343A40] text-[16px]">
+                            <h1 className="text-[#343A40] font-thin  text-[16px]">
                               {item.description}
                             </h1>
                           </div>
@@ -324,7 +324,7 @@ const toggleFilter = (
 
                                 <h1>{item.employee.surname}</h1>
                               </div>
-                              <p className="text-sm text-[13px] text-neutral-600">
+                              <p className="text-sm text-[12px] font-bold text-neutral-600">
                                 {item.department.name}
                               </p>
                             </div>
