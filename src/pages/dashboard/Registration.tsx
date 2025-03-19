@@ -20,9 +20,6 @@ const Registration = () => {
     cacheTime: 1000 * 60 * 20,
   });
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
 
   const ApplyRegistration = async () => {
     const newErrors: { [key: string]: string } = {};
@@ -44,6 +41,7 @@ const Registration = () => {
     }
 
     setErrors(newErrors);
+    console.log(newErrors)
 
     if (Object.keys(newErrors).length === 0) {
       const formData = new FormData();
@@ -52,13 +50,15 @@ const Registration = () => {
       formData.append("avatar", avatar as Blob);
       formData.append("department_id", String(selectedOption));
 
+      console.log(formData)
+
+      const VerifiedUser = {
+        name: username,
+        avatar: avatar
+      }
+
       try {
-        await instance.post("employees", formData, {
-          headers: {
-            Authorization: `Bearer 9e6a8204-857d-4f5c-b9ec-31baabaf3581`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        await instance.post("employees", formData);
         console.log("Employee added successfully!");
         setUserName("");
         setSurName("");
@@ -66,6 +66,7 @@ const Registration = () => {
         setSelectedOption(null);
         setErrors({});
         dispatch(ModeSwicher());
+        localStorage.setItem("ValEmployee", JSON.stringify(VerifiedUser));
       } catch (error) {
         console.error("Error posting data:", error);
       }
@@ -92,7 +93,6 @@ const Registration = () => {
 
         <div className="flex flex-row gap-[45px]">
           <div className="flex flex-col gap-1">
-            
             <label>სახელი</label>
             <input
               type="text"
@@ -106,14 +106,13 @@ const Registration = () => {
           </div>
 
           <div className="flex flex-col gap-1">
-           
             <label>გვარი</label>
             <input
               type="text"
               value={surname}
               onChange={(e) => setSurName(e.target.value)}
               className="p-[10px] w-[384px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
-            /> 
+            />
             {errors.surname && (
               <p className="text-red-500 text-sm">{errors.surname}</p>
             )}
@@ -121,31 +120,41 @@ const Registration = () => {
         </div>
 
         <div className="flex flex-col gap-1">
-         
-          <label>ავატარი</label>
+          <div className="flex flex-col items-center justify-center gap-3">
+            <label
+              htmlFor={"file"}
+              className="border-dashed cursor-pointer border-[#ac71ff] text-[#8338EC] rounded-[5px] h-[120px] flex flex-col items-center justify-center w-[813px] border-1 p-[10px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+            >
+              <img
+                src="https://img.icons8.com/?size=100&id=cDnEsiNX3cmm&format=png&color=8338EC"
+                alt="imgicon"
+                className="w-10 h-auto"
+              />
+              ავატარი
+            </label>
+          </div>
           <input
             type="file"
+            id="file"
             accept="image/*"
             onChange={(e) => e.target.files && setAvatar(e.target.files[0])}
-            className="border-dashed rounded-[5px] h-[120px] flex items-center justify-center w-[813px] border-[#CED4DA] border-1 p-[10px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
-          /> 
+          />
           {errors.avatar && (
             <p className="text-red-500 text-sm">{errors.avatar}</p>
           )}
         </div>
 
         <div className="flex flex-col gap-1 self-start">
-         
           <label>დეპარტამენტი</label>
           <select
             name="department"
             onChange={(e) => setSelectedOption(Number(e.target.value))}
             value={selectedOption ?? ""}
             className="p-[10px] w-[384px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
-          > 
-          {errors.selectedOption && (
-            <p className="text-red-500 text-sm">{errors.selectedOption}</p>
-          )}
+          >
+            {errors.selectedOption && (
+              <p className="text-red-500 text-sm">{errors.selectedOption}</p>
+            )}
             <option value="">აირჩიეთ დეპარტამენტი</option>
             {data?.length > 0 ? (
               data.map((item: any) => (
@@ -167,7 +176,7 @@ const Registration = () => {
             გაუქმება
           </button>
           <button
-            onClick={() => {dispatch(ModeSwicher()), ApplyRegistration}}
+            onClick={ApplyRegistration}
             className="py-[10px] px-[30px] border-[1px] bg-[#8338EC] rounded-md text-[16px] cursor-pointer transition-all ease-in-out text-white hover:bg-[#B588F4]"
           >
             დაამატე თანამშრომელი

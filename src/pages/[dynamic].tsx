@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react'
 import Header from './dashboard/Header'
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
-import { FetchComments, FetchProperties, FetchTasks, instance } from './api/REST';
+import { FetchComments, FetchTasks, instance } from './api/REST';
 import { Task, formatDate } from './dashboard/Tasks';
 import { Deadline, Employee, Status } from './dashboard/Svgs';
 import { fredoka } from '.';
+import Registration from './dashboard/Registration';
 
 const TaskInfo = () => {
   const router = useRouter()
@@ -16,6 +17,7 @@ const TaskInfo = () => {
   const [StatChange, setStatChange] = useState<number>()
   const [HandleText, setHandleText] = useState<string>('')
   const [color, setColor] = useState<string>();
+  const [Isactive, setIsactive] = useState<{status: boolean, id: number | null}>({status: false, id: null});
 
   const { data, error, isLoading } = useQuery<Task[] | undefined>({
     queryKey: ["all"],
@@ -24,29 +26,38 @@ const TaskInfo = () => {
     cacheTime: 1000 * 60 * 20,
   });
 
-  const PostComment = async () => {
+  const PostComment = async (id: number | null) => {
+    const userRaw = localStorage.getItem("ValEmployee");
+    const user = userRaw ? JSON.parse(userRaw) : null;
+    console.log(user.name);
+
     const postDat = {
       text: HandleText,
-      author_avatar: "https://api.dicebear.com/9.x/thumbs/svg?seed=Chrome34.96.41.195",
-      author_nickname: "Pinkie",
-      parent_id: null
-    }
+      author_avatar: user.avatar,
+      author_nickname: user.name,
+      parent_id: id || null,
+    };
     
     try{
       await instance.post(`tasks/${task?.id}/comments`, postDat)
+      setHandleText('')
       refetch()
     }catch(err) {
       console.log(err)
     }
   }
 
+  useEffect(() => {
+    refetch()
+  }, [])
+
   const {
     data: comments,
     error: comerr,
     isLoading: comload,
-    refetch
+    refetch,
   } = useQuery({
-    queryKey: ["comments"],
+    queryKey: ["comments", task?.id],
     queryFn: () => FetchComments(task?.id),
     enabled: !!task?.id && !!PostComment,
     staleTime: 1000 * 60 * 10,
@@ -91,11 +102,13 @@ const TaskInfo = () => {
     };
 
     setColor(colorPicker(filteredData?.priority.id));
-    console.log(colorPicker(filteredData?.priority.id));
   }, [data])
 
   return (
     <>
+      <div className="fixed z-10">
+        <Registration />
+      </div>
       <Header />
       <div className="w-full h-full bg-[#fff] flex mt-12 items-start justify-around min-h-screen">
         <div className="flex flex-col text-[#212529] items-start justify-between gap-52">
@@ -137,7 +150,11 @@ const TaskInfo = () => {
                   {task?.status.name}
                 </option>
                 {Stat?.map(({ id, name }) => (
-                  <option value={id}>{name}</option>
+                  <>
+                    <option key={id} value={id}>
+                      {name}
+                    </option>
+                  </>
                 ))}
               </select>
             </div>
@@ -193,14 +210,22 @@ const TaskInfo = () => {
           />
 
           <button
-            onClick={PostComment}
+            onClick={() => PostComment(null)}
             className="self-end cursor-pointer w-[155px] text-white rounded-full px-5 py-2 transition-colors ease-out bg-[#8338EC] hover:bg-[#B588F4]"
           >
-            არჩევა
+            დააკომენტარე
           </button>
+
+          <div className="flex flex-row items-center gap-4">
+            <h1 className="text-3xl font-bold">კომენტარები</h1>
+            <h1 className="bg-[#8338EC] flex w-9 h-7 text-white rounded-3xl justify-center items-center px-2">
+              {comments?.length > 0 ? comments?.length : 0}
+            </h1>
+          </div>
+
           <div className="flex flex-col gap-10">
-            {comments?.map((item: any, idx: number) => (
-              <div key={idx} className="flex flex-col gap-1">
+            {comments?.map((item: any) => (
+              <div key={item.id} className="flex flex-col gap-1">
                 <div className="flex items-center gap-3">
                   <img
                     src={item.author_avatar}
@@ -211,7 +236,64 @@ const TaskInfo = () => {
                     <h1 className="font-semibold">{item.author_nickname}</h1>
                   </div>
                 </div>
-                <p className="text-left text-sm">{item.text}</p>
+
+                <p className="text-left ml-10 text-sm">{item.text}</p>
+                <div className="flex flex-col m-3 ml-10 items-start justify-center gap-5">
+                  {item.sub_comments?.map((subItem: any) => (
+                    <div
+                      key={subItem.id}
+                      className="flex flex-row gap-3 text-black ml-5"
+                    >
+                      <img
+                        src={item.author_avatar}
+                        alt="employee-avatar"
+                        className="h-[31px] w-[31px] rounded-full object-cover"
+                      />
+                      <div className="flex flex-col items-start gap-2">
+                        <h1 className="font-semibold">
+                          {subItem.author_nickname}
+                        </h1>
+                        <h1 className="text-left">{subItem.text}</h1>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {Isactive.id === item.id && Isactive.status && (
+                  <>
+                    <div id={item.id}>
+                      <input
+                        type="text"
+                        value={HandleText}
+                        onChange={(e) => setHandleText(e.target.value)}
+                        className="p-[10px] bg-white w-[384px] border-[1px] border-[#CED4DA] rounded-l-2xl focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+                      />
+                      <button
+                        onClick={() => PostComment(item.id)}
+                        className="self-end cursor-pointer w-[155px] text-white rounded-r-full px-5 py-3 transition-colors ease-out bg-[#8338EC] hover:bg-[#B588F4]"
+                      >
+                        დააკომენტარე
+                      </button>
+                    </div>
+                  </>
+                )}
+                <div className="ml-10 cursor-pointer text-[#8338EC] flex flex-col gap-2">
+                  <div
+                    onClick={() =>
+                      setIsactive((prev) => ({
+                        status: !prev.status,
+                        id: item.id,
+                      }))
+                    }
+                    className="flex items-center gap-2"
+                  >
+                    <img
+                      src="https://img.icons8.com/?size=100&id=100399&format=png&color=8338EC"
+                      alt="arrow"
+                      className="w-5 h-auto"
+                    />
+                    <h1>უპასუხე</h1>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

@@ -76,12 +76,11 @@ const toggleFilter = (
   setOption(name);
 };
 
-
   const [tasksByStatus, setTasksByStatus] = useState<{ [key: string]: Task[] }>(
     {}
   );
 
-  const { data, error, isLoading } = useQuery<Task[]>({
+  const { data, error, isLoading, refetch} = useQuery<Task[]>({
     queryKey: ["all"],
     queryFn: FetchTasks,
     staleTime: 1000 * 60 * 10,
@@ -101,6 +100,10 @@ const toggleFilter = (
       prev.includes(id) ? prev.filter((prevId) => prevId !== id) : [...prev, id]
     );
   };
+
+  useEffect(() => {
+    refetch()
+  }, [])
 
   useEffect(() => {
     const kk: any =
@@ -157,8 +160,6 @@ const toggleFilter = (
     if (!data || !Array.isArray(data) || data.length === 0) {
       return console.log("No data or empty array", data);
     }
-
-    console.log("Setting initial data:", data);
 
     const initialTasksByStatus = data.reduce(
       (acc: { [key: string]: Task[] }, item: Task) => {
@@ -294,9 +295,7 @@ const toggleFilter = (
                               />
                               <h1>{item.priority.name}</h1>
                             </div>
-                            <h1
-                              className="font-mono text-[#212529]"
-                            >
+                            <h1 className="font-mono text-[#212529]">
                               {formatDate(item.due_date)}
                             </h1>
                           </div>
@@ -329,7 +328,7 @@ const toggleFilter = (
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 cursor-pointer">
+                          <div onClick={() => router.push(`/${item.id}`)} className="flex items-center gap-1 cursor-pointer">
                             <img
                               src="https://img.icons8.com/?size=100&id=11167&format=png&color=000000"
                               alt="comment"
