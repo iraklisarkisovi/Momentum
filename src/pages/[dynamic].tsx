@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import Header from './dashboard/Header'
+import Header from '../Components/Header'
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
 import { FetchComments, FetchTasks, instance } from './api/REST';
-import { Task, formatDate } from './dashboard/Tasks';
-import { Deadline, Employee, Status } from './dashboard/Svgs';
+import { Task, formatDate } from '../Components/Tasks';
+import { Deadline, Employee, Status } from '../../public/Svgs';
 import { fredoka } from '.';
-import Registration from './dashboard/Registration';
+import Registration from '../Components/Registration';
 
 const TaskInfo = () => {
   const router = useRouter()
@@ -27,14 +27,12 @@ const TaskInfo = () => {
   });
 
   const PostComment = async (id: number | null) => {
-    const userRaw = localStorage.getItem("ValEmployee");
-    const user = userRaw ? JSON.parse(userRaw) : null;
-    console.log(user.name);
+    // const userRaw = localStorage.getItem("ValEmployee");
+    // const user = userRaw ? JSON.parse(userRaw) : null;
+    // console.log(user.name);
 
     const postDat = {
       text: HandleText,
-      author_avatar: user.avatar,
-      author_nickname: user.name,
       parent_id: id || null,
     };
     

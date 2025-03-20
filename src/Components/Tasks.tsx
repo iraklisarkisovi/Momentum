@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import { useQuery } from "@tanstack/react-query";
-import { FetchProperties, FetchTasks } from "../api/REST";
+import { FetchProperties, FetchTasks } from "../pages/api/REST";
 import { format, isValid } from "date-fns";
 import { ka } from "date-fns/locale";
 import pluralize from "pluralize";
 import Registration from "./Registration";
 import { useRouter } from "next/router";
-import { fredoka } from "..";
+import { fredoka } from "../pages";
 
  
 const Stats = [

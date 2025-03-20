@@ -7,7 +7,7 @@ const ApiUrl = process.env.NEXT_PUBLIC_API;
 export const instance = axios.create({
   baseURL: ApiUrl,
   headers: {
-    Authorization: `Bearer 9e6a8204-857d-4f5c-b9ec-31baabaf3581`,
+    Authorization: `Bearer 9e7ac707-f855-4492-b9a8-88c3d3edb18b`,
   },
 });
 

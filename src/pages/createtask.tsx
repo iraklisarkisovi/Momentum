@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, useEffect, useReducer } from "react";
-import Header from "./dashboard/Header";
-import Registration from "./dashboard/Registration";
+import Header from "../Components/Header";
+import Registration from "../Components/Registration";
 import { instance } from "./api/REST";
 import { useRouter } from "next/router";
 

@@ -1,4 +1,4 @@
-import Tasks from "./dashboard/Tasks";
+import Tasks from "../Components/Tasks";
 import { Fredoka } from "next/font/google";
 import localFont from 'next/font/local';
 

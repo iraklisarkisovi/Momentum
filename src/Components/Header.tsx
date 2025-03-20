@@ -1,5 +1,5 @@
 import React from 'react'
-import { fredoka } from '..';
+import { fredoka } from '../pages';
 import { useDispatch } from 'react-redux';
 import { ModeSwicher } from '../Redux/Slice';
 import Link from 'next/link';
