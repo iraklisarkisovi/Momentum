@@ -10,7 +10,7 @@ const Registration = () => {
   const [username, setUserName] = useState<string>("");
   const [surname, setSurName] = useState<string>("");
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [avatar, setAvatar] = useState<any>(null);
+  const [avatar, setAvatar] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const { data } = useQuery({
@@ -74,13 +74,6 @@ const Registration = () => {
   };
 
   useEffect(() => {
-    if (!avatar)
-      return setAvatar("https://img.icons8.com/?size=100&id=cDnEsiNX3cmm&format=png&color=8338EC");
-    if (typeof avatar === "string") return setAvatar(avatar);
-    return setAvatar(URL.createObjectURL(avatar)) 
-  }, [avatar]);
-
-  useEffect(() => {
     if(mode === false){
       setUserName("");
       setSurName("");
@@ -142,7 +135,9 @@ const Registration = () => {
               className="border-dashed cursor-pointer border-[#ac71ff] text-[#8338EC] rounded-[5px] h-[120px] flex flex-col items-center justify-center w-[813px] border-1 p-[10px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
             >
               <img
-                src={avatar}
+                src={
+                  "https://img.icons8.com/?size=100&id=cDnEsiNX3cmm&format=png&color=8338EC"
+                }
                 alt="imgicon"
                 className="w-16 rounded-full h-auto"
               />
@@ -153,7 +148,9 @@ const Registration = () => {
             type="file"
             id="file"
             accept="image/*"
-            onChange={(e) => {e.target.files && setAvatar(e.target.files[0])} }
+            onChange={(e) => {
+              e.target.files && setAvatar(e.target.files[0]);
+            }}
           />
           {errors.avatar && (
             <p className="text-red-500 text-sm">{errors.avatar}</p>
