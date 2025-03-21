@@ -70,9 +70,7 @@ const TaskCreation: React.FC = () => {
     if (!formData.due_date) newErrors.due_date = "აირჩიეთ დედლაინი.";
 
     setErrors(newErrors);
-    console.log(newErrors);
     if (Object.keys(newErrors).length === 0) {
-      console.log("Valid Form Data:", formData);
 
       const postTaskData = async () => {
         try{

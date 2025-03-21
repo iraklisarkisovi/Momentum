@@ -4,12 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { FetchProperties, FetchTasks } from "../pages/api/REST";
 import { format, isValid } from "date-fns";
 import { ka } from "date-fns/locale";
-import pluralize from "pluralize";
 import Registration from "./Registration";
 import { useRouter } from "next/router";
-import { fredoka } from "../pages";
 
- 
 const Stats = [
   { name: "დასაწყები", color: "#F7BC30" },
   { name: "პროგრესში", color: "#FB5607" },
@@ -18,172 +15,164 @@ const Stats = [
 ];
 
 const DropDowns = [
-  { key: "department", name: "დეპარტამენტი", KeyName: "departments" },
-  { key: "priority", name: "პრიორიტეტი", KeyName: "priorities" },
-  { key: "employee", name: "თანამშრომელი", KeyName: "employees" },
+  { key: "departments", name: "დეპარტამენტი" },
+  { key: "priorities", name: "პრიორიტეტი" },
+  { key: "employees", name: "თანამშრომელი" },
 ] as const;
 
+
 export type Task = {
-  option: any;
   id: number;
   name: string;
   description: string;
-  due_date: string;
-  priority: { name: string; icon?: string, id: number};
-  status: { name: string, id: number };
-  employee: {
-    surname: string; name: string; avatar: string 
-};
-  department: { name: string };
+  due_date: any;
+  priority: { name: string; icon?: string; id: number };
+  status: { name: string; id: number };
+  employee: { surname: string; name: string; avatar: string; id: number };
+  department: { name: string; id: number };
   total_comments: number;
 };
 
-export const formatDate = (dateString: any) => {
+export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  if (!isValid(date)) {
-    return "Invalid Date";
-  }
+  if (!isValid(date)) return "Invalid Date";
   return format(date, "d MMMM yyyy, HH:mm", { locale: ka });
+};  
+
+type FilterItem = { id: number; name: string };
+type FilterKey = "departments" | "priorities" | "employees";
+
+type SelectedFilters = {
+  departments: FilterItem[];
+  priorities: FilterItem[];
+  employees: FilterItem[];
 };
+
+const FilteredVAl = {
+    departments: [],
+    priorities: [],
+    employees: [],
+}
 
 const Main: React.FC = () => {
-  const [departments, setDepartments] = useState<{ id: number; name: string }[]>([]);
-  const [selectedDepartments, setSelectedDepartments] = useState<number[]>([]);
-  const [all, setAll] = useState(false);
-  const [option, setOption] = useState<string>("");
-  const router = useRouter()
 
-  useEffect(() => {
-    console.log(option, selectedDepartments);
-  }, [option, selectedDepartments]);
 
-  const [activeFilter, setActiveFilter] = useState<"departments" | "priorities" | "employees" | null>(null)
+  const router = useRouter();
+  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>(FilteredVAl);
 
-const toggleFilter = (
-  filter: "department" | "priority" | "employee",
-  name: string
-) => {
-
-  const convert = pluralize.plural(filter) as
-    | "departments"
-    | "priorities"
-    | "employees";
-  console.log(convert)
-  
-  setActiveFilter((prev) => (prev === convert ? null : convert));
-
-  setAll(activeFilter === convert ? false : true);
-  setOption(name);
-};
-
+  const [activeFilter, setActiveFilter] = useState<
+    "departments" | "priorities" | "employees" | null
+  >(null);
+  const [filterOptions, setFilterOptions] = useState<
+    { id: number; name: string }[]
+  >([]);
   const [tasksByStatus, setTasksByStatus] = useState<{ [key: string]: Task[] }>(
     {}
   );
 
-  const { data, error, isLoading, refetch} = useQuery<Task[]>({
+  const { data, error, isLoading, refetch } = useQuery<Task[]>({
     queryKey: ["all"],
     queryFn: FetchTasks,
     staleTime: 1000 * 60 * 10,
     cacheTime: 1000 * 60 * 20,
   });
 
-  const { data: data2 } = useQuery({
-    queryKey: ["departments", option],
-    queryFn: () => FetchProperties(option),
-    enabled: !!option,
-    staleTime: 1000 * 60 * 10,
-    cacheTime: 1000 * 60 * 20,
-  });
-
-  const OptionHandling = (id: number) => {
-    setSelectedDepartments((prev) =>
-      prev.includes(id) ? prev.filter((prevId) => prevId !== id) : [...prev, id]
-    );
-  };
-
   useEffect(() => {
     refetch()
   }, [])
 
-  useEffect(() => {
-    const kk: any =
-      activeFilter === "departments" ||
-      activeFilter === "priorities" ||
-      activeFilter === "employees"
-        ? activeFilter
-        : null;
-    setOption(kk);
-  }, [option]);
+  const { data: propertyData } = useQuery({
+    queryKey: ["filters", activeFilter],
+    queryFn: () => FetchProperties(activeFilter!),
+    enabled: !!activeFilter,
+    staleTime: 1000 * 60 * 10,
+    cacheTime: 1000 * 60 * 20,
+  });
 
   useEffect(() => {
-    if (data2 && Array.isArray(data2)) {
-      setDepartments(data2);
+    if (propertyData && Array.isArray(propertyData)) {
+      setFilterOptions(propertyData);
     }
-  }, [data2]);
+  }, [propertyData]);
 
-  const FilterTasks = () => {
-    if (!data) return console.log("No data available");
+  const toggleFilter = (key: "departments" | "priorities" | "employees") => {
+    setActiveFilter((prev) => (prev === key ? null : key));
+  };
 
-    console.log("Active Filter:", activeFilter);
-    console.log("Selected Departments:", selectedDepartments);
-    const singularOption = pluralize.singular(option)
-    
-    const filteredTasks =
-      option && selectedDepartments.length > 0
-        ? data.filter(
-            (task) =>
-              task[singularOption as keyof Task] &&
-              "id" in task[singularOption as keyof Task] &&
-              selectedDepartments.includes(
-                (task[singularOption as keyof Task] as { id: number }).id
-              )
-          )
-        : data;
-
-    console.log("Filtered Tasks:", filteredTasks);
-
-    console.log(tasksByStatus);
-    const groupedTasks = filteredTasks.reduce(
-      (acc: { [key: string]: Task[] }, item: Task) => {
-        const status = item.status.name;
-        if (!acc[status]) acc[status] = [];
-        acc[status].push(item);
-        return acc;
-      },
-      {}
-    );
-
-    setTasksByStatus((prev) => groupedTasks || prev);
+  const handleOptionSelect = (id: number, name: string) => {
+    if (!activeFilter) return;
+    setSelectedFilters((prev) => {
+      const exists = prev[activeFilter].some((item) => item.id === id);
+      if (exists) return prev;
+      return {
+        ...prev,
+        [activeFilter]: [...prev[activeFilter], { id, name }],
+      };
+    });
   };
 
   useEffect(() => {
-    if (!data || !Array.isArray(data) || data.length === 0) {
-      return console.log("No data or empty array", data);
+      if (!data) return;
+
+      let filteredTasks = [...data];
+
+      if (selectedFilters.departments.length > 0) {
+        filteredTasks = filteredTasks.filter((task) =>
+          selectedFilters.departments.some(
+            (dept) => task.department?.id === dept.id
+          )
+        );
+      }
+
+      if (selectedFilters.priorities.length > 0) {
+        filteredTasks = filteredTasks.filter((task) =>
+          selectedFilters.priorities.some((prio) => task.priority?.id === prio.id)
+        );
+      }
+
+      if (selectedFilters.employees.length > 0) {
+        filteredTasks = filteredTasks.filter((task) =>
+          selectedFilters.employees.some((emp) => task.employee?.id === emp.id)
+        );
+      }
+
+      const groupedTasks = filteredTasks.reduce(
+        (acc: { [key: string]: Task[] }, item) => {
+          const status = item.status.name;
+          if (!acc[status]) acc[status] = [];
+          acc[status].push(item);
+          return acc;
+        },
+        {}
+      );
+
+      setTasksByStatus(groupedTasks);
+  }, [selectedFilters])
+
+  useEffect(() => {
+    if (data) {
+      const groupedTasks = data.reduce(
+        (acc: { [key: string]: Task[] }, item) => {
+          const status = item.status.name;
+          if (!acc[status]) acc[status] = [];
+          acc[status].push(item);
+          return acc;
+        },
+        {}
+      );
+      setTasksByStatus(groupedTasks);
     }
-
-    const initialTasksByStatus = data.reduce(
-      (acc: { [key: string]: Task[] }, item: Task) => {
-        const status = item.status.name;
-        if (!acc[status]) acc[status] = [];
-        acc[status].push(item);
-        return acc;
-      },
-      { all: data }
-    );
-
-    setTasksByStatus(initialTasksByStatus);
   }, [data]);
-
- 
 
   const colorPicker = (id: number) => {
     if (id === 1) return "#08A508";
     if (id === 2) return "#FFBE0B";
-    if (id === 3) return "#FA4D4D";   
-  }
+    if (id === 3) return "#FA4D4D";
+  };
 
   if (error) return <h1>Oops! Something went wrong.</h1>;
   if (isLoading) return <h1>Loading...</h1>;
+
   return (
     <>
       <div className="fixed z-10">
@@ -196,76 +185,83 @@ const toggleFilter = (
           დავალებების გვერდი
         </h1>
 
-        <div className="w-[688px] h-[44px] md:ml-14 flex justify-between rounded-[10px] border-[0.5px] border-[#DEE2E6]">
-          {DropDowns.map(({ key, name, KeyName }) => (
+        <div className="w-[688px] h-[44px] md:ml-14 flex justify-between rounded-[10px] border border-[#DEE2E6]">
+          {DropDowns.map(({ key, name }) => (
             <button
               key={key}
-              onClick={() => toggleFilter(key, KeyName)}
+              onClick={() => toggleFilter(key)}
               className={`px-4 flex items-center text-[16px] gap-2 transition ${
-                pluralize.plural(key) === activeFilter
-                  ? "text-[#8338EC]"
-                  : "text-black"
+                activeFilter === key ? "text-[#8338EC]" : "text-black"
               }`}
             >
               <h1 className="font-sans">{name}</h1>
-              <span
-                className={`width-[10px] ${
-                  pluralize.plural(key) === activeFilter
-                    ? "text-[#8338EC]"
-                    : "text-black"
-                }`}
-              >
-                &#9662;
-              </span>
+              <span>&#9662;</span>
             </button>
           ))}
         </div>
 
-        <div
-          className={`${
-            all ? "block" : "hidden"
-          } flex flex-col items-left w-[688px] absolute border-[0.5px] rounded-[10px] top-[230px] py-[40px] px-[25px] border-[#8338EC] bg-white justify-evenly gap-2 md:ml-14`}
-        >
-          {departments && departments.length > 0 ? (
-            departments.map((item: any) => (
-              <div key={item.id} className="text-black flex flex-row gap-3">
-                <input
-                  type="checkbox"
-                  value={item.id}
-                  onChange={() => OptionHandling(item.id)}
-                  className="text-blue-600 border-blue-600 rounded-2xl"
+        <div className="flex flex-row gap-5 ml-16">
+          {Object.entries(selectedFilters).map(([filterKey, values]) =>
+            values.map((item) => (
+              <div
+                key={`${filterKey}-${item.id}`}
+                onClick={() =>
+                  setSelectedFilters((prevFilters) => ({
+                    ...prevFilters,
+                    [filterKey as FilterKey]: prevFilters[
+                      filterKey as FilterKey
+                    ].filter((f) => f.id !== item.id),
+                  }))
+                }
+                className="rounded-full flex flex-row gap-3 cursor-pointer border-[1px] border-[#CED4DA] px-3 py-1 text-sm"
+              >
+                {item.name}
+                <img
+                  src="https://img.icons8.com/?size=100&id=46&format=png&color=000000"
+                  alt="X"
+                  className="w-5 h-5"
                 />
-                <h1>{item.name}</h1>
               </div>
             ))
-          ) : (
-            <h1>{option + " are not avaliable..."}</h1>
           )}
-          <button
-            onClick={() => FilterTasks()}
-            className="cursor-pointer w-[155px] ml-[450px] text-white rounded-[20px] px-[20px] py-[8px] transition-colors ease-out bg-[#8338EC] hover:bg-[#B588F4]"
-          >
-            არჩევა
+          <button className="cursor-pointer" onClick={() => setSelectedFilters(FilteredVAl)}>
+            გასუფთავება
           </button>
         </div>
 
+        {activeFilter && (
+          <div className="flex flex-col items-left w-[688px] absolute border rounded-[10px] top-[230px] py-[40px] px-[25px] border-[#8338EC] bg-white md:ml-14 gap-2">
+            {filterOptions.length > 0 ? (
+              filterOptions.map((item) => (
+                <div key={item.id} className="text-black flex gap-3">
+                  <input
+                    type="checkbox"
+                    value={item.id}
+                    onChange={() => handleOptionSelect(item.id, item.name)}
+                    className="text-blue-600 rounded-2xl"
+                  />
+                  <h1>{item.name}</h1>
+                </div>
+              ))
+            ) : (
+              <h1>No options available...</h1>
+            )}
+
+          </div>
+        )}
+
         <div className="flex flex-wrap md:ml-14 justify-center md:justify-start gap-5 md:gap-10 w-full">
           {Stats.map(({ name, color }) => (
-            <div
-              key={name}
-              className="w-full sm:w-[48%] md:w-[381px] self-stretch"
-            >
+            <div key={name} className="w-full sm:w-[48%] md:w-[381px]">
               <div
                 className="py-3 h-[54px] text-center text-[20px] rounded-[10px] text-white"
                 style={{ backgroundColor: color }}
               >
                 <h1>{name}</h1>
               </div>
-
               <div className="flex flex-col gap-5 items-center mb-10">
                 {tasksByStatus[name]?.length > 0 ? (
-                  tasksByStatus[name]?.map((item) => {
-
+                  tasksByStatus[name].map((item) => {
                     const pickColor = colorPicker(item.priority.id);
 
                     return (
@@ -328,7 +324,10 @@ const toggleFilter = (
                               </p>
                             </div>
                           </div>
-                          <div onClick={() => router.push(`/${item.id}`)} className="flex items-center gap-1 cursor-pointer">
+                          <div
+                            onClick={() => router.push(`/${item.id}`)}
+                            className="flex items-center gap-1 cursor-pointer"
+                          >
                             <img
                               src="https://img.icons8.com/?size=100&id=11167&format=png&color=000000"
                               alt="comment"
@@ -338,7 +337,8 @@ const toggleFilter = (
                           </div>
                         </div>
                       </div>
-                    );})
+                    );
+                  })
                 ) : (
                   <>
                     <h1 className="text-xl mt-10">მონაცემები ვერ მოიძებნა</h1>

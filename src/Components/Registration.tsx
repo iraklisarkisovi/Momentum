@@ -50,8 +50,6 @@ const Registration = () => {
       formData.append("avatar", avatar as Blob);
       formData.append("department_id", String(selectedOption));
 
-      console.log(formData)
-
       const VerifiedUser = {
         name: username,
         avatar: avatar

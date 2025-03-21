@@ -27,10 +27,6 @@ const TaskInfo = () => {
   });
 
   const PostComment = async (id: number | null) => {
-    // const userRaw = localStorage.getItem("ValEmployee");
-    // const user = userRaw ? JSON.parse(userRaw) : null;
-    // console.log(user.name);
-
     const postDat = {
       text: HandleText,
       parent_id: id || null,
