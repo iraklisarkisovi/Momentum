@@ -104,9 +104,9 @@ const TaskInfo = () => {
         <Registration />
       </div>
       <Header />
-      <div className="w-full h-full bg-[#fff] flex mt-12 items-start justify-around min-h-screen">
-        <div className="flex flex-col text-[#212529] items-start justify-between gap-52">
-          <div className="gap-[26px] flex flex-col">
+      <div className="w-full h-full bg-[#fff] flex max-lg:flex-col mt-12 max-md:items-center items-start gap-10 max-md:gap-20 justify-around min-h-screen">
+        <div className="flex flex-col text-[#212529] items-start max-md:w-screen justify-between max-md:gap-30 gap-52">
+          <div className="gap-[26px] m-5 flex flex-col">
             <div
               className={`flex items-center justify-center gap-1 h-[32px] w-[106px] p-1 rounded-[5px]`}
               style={{
@@ -127,9 +127,9 @@ const TaskInfo = () => {
             <h1 className="text-[18px]">{task?.description}</h1>
           </div>
 
-          <div className="flex flex-col items-start justify-center gap-[18px] w-[493px] h-[277px]">
+          <div className="flex m-5 flex-col items-start justify-center max-md:w-fit gap-[50px] w-[493px] h-[277px]">
             <h1 className="text-[24px] font-[500]">დავალების დეტალები</h1>
-            <div className="flex flex-row items-center justify-around gap-[70px]">
+            <div className="flex flex-row items-center max-md:flex-col max-md:items-start max-md:gap-2 justify-around gap-[70px]">
               <div className="flex flex-row gap-1">
                 <Status />
                 <h1>სტატუსი</h1>
@@ -152,7 +152,7 @@ const TaskInfo = () => {
                 ))}
               </select>
             </div>
-            <div className="flex flex-row gap-[70px] items-center justify-around">
+            <div className="flex flex-row gap-[70px] max-md:gap-1 max-md:items-start max-md:flex-col items-center justify-around">
               <div className="flex flex-row gap-1">
                 <Employee />
                 <h1>თანამშრომელი</h1>
@@ -177,7 +177,7 @@ const TaskInfo = () => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-row gap-[70px]">
+            <div className="flex flex-row gap-[70px] max-md:gap-5">
               <div className="flex flex-row gap-1">
                 <Deadline />
                 <h1>დავალების ვადა</h1>
@@ -195,7 +195,7 @@ const TaskInfo = () => {
           </div>
         </div>
 
-        <div className="w-[741px] flex flex-col px-16 gap-5 py-10 text-[#212529] h-auto bg-[#DDD2FF] rounded-[10px] border border-[#F8F3FEA6]">
+        <div className="w-[741px] max-md:w-full flex flex-col px-16 gap-5 py-10 text-[#212529] h-auto bg-[#DDD2FF] rounded-[10px] border border-[#F8F3FEA6]">
           <textarea
             placeholder="დაწერე კომენტარი"
             value={HandleText}

@@ -118,13 +118,13 @@ const TaskCreation: React.FC = () => {
       </div>
       <Header />
 
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="w-[1684px]">
-          <h1 className="text-4xl font-bold text-[#343A40] mr-auto mb-10">
+      <div className="flex max-sm:mt-10 flex-col max-md:items-center max-md:p-full items-center m-3 justify-center min-h-screen gap-10  text-[#212529]">
+        <div className="w-[1684px] max-md:w-[350px]">
+          <h1 className="text-4xl max-md:text-2xl font-bold text-[#343A40] mr-auto mb-10">
             შექმენი ახალი დავალება
           </h1>
         </div>
-        <div className="flex bg-[#FBF9FFA6] w-[1684px] rounded-[4px] text-[#343A40] h-[804px] flex-row items-center justify-around">
+        <div className="flex bg-[#FBF9FFA6] w-[1684px] max-md:w-[400px] rounded-[4px] text-[#343A40] h-[804px]  max-md:h-fit flex-row max-md:gap-10 max-md:flex-col items-center justify-around">
           <div className="flex flex-col items-start justify-between gap-27">
             <div className="flex flex-col items-start gap-1">
               <label>
@@ -136,7 +136,7 @@ const TaskCreation: React.FC = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="p-[10px] w-[550px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+                className="p-[10px] w-[550px] max-md:w-[350px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
               />
               {errors.name && (
                 <p className="text-[#08A508] text-sm">{errors.title}</p>
@@ -153,14 +153,14 @@ const TaskCreation: React.FC = () => {
                 value={formData.description}
                 onChange={handleChange}
                 maxLength={260}
-                className="p-[10px] max-h-[200px] min-h-[150px] w-[550px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+                className="p-[10px] max-h-[200px] max-md:max-w-[350px]  min-h-[150px] w-[550px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
               />
               {errors.description && (
                 <p className="text-[#08A508] text-sm">{errors.title}</p>
               )}
             </div>
 
-            <div className="flex flex-row items-start gap-8">
+            <div className="flex flex-row max-md:flex-col items-start gap-8">
               <div className="flex flex-col items-start gap-1">
                 <label>
                   პრიორიტეტი
@@ -170,7 +170,7 @@ const TaskCreation: React.FC = () => {
                   name="priority_id"
                   value={formData.priority_id}
                   onChange={handleChange}
-                  className="p-[10px] w-[259px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+                  className="p-[10px] w-[259px] max-md:w-[350px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
                 >
                   <option value="" disabled hidden>
                     აირჩიეთ პრიორიტეტი
@@ -193,7 +193,7 @@ const TaskCreation: React.FC = () => {
                   name="status_id"
                   value={formData.status_id}
                   onChange={handleChange}
-                  className="p-[10px] w-[259px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+                  className="p-[10px] w-[259px] max-md:w-[350px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
                 >
                   <option value="" disabled hidden>
                     აირჩიეთ სტატუსი
@@ -219,7 +219,7 @@ const TaskCreation: React.FC = () => {
                 name="department_id"
                 value={formData.department_id}
                 onChange={handleChange}
-                className="p-[10px] w-[384px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+                className="p-[10px] w-[384px] max-md:w-[350px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
               >
                 <option value="" disabled hidden>
                   აირჩიეთ დეპარტამენტი
@@ -243,7 +243,7 @@ const TaskCreation: React.FC = () => {
                 name="employee_id"
                 value={formData.employee_id}
                 onChange={handleChange}
-                className="p-[10px] w-[384px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+                className="p-[10px] w-[384px] max-md:w-[350px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
               >
                 <option value="" disabled hidden>
                   აირჩიეთ თანამშრომელი
@@ -265,7 +265,7 @@ const TaskCreation: React.FC = () => {
                 name="due_date"
                 value={formData.due_date}
                 onChange={handleChange}
-                className="p-[10px] w-[316px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+                className="p-[10px] w-[316px] max-md:w-[350px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
               />
             </div>
 

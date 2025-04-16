@@ -180,12 +180,12 @@ const Main: React.FC = () => {
       </div>
 
       <Header />
-      <main className="flex flex-col items-start justify-start min-h-screen gap-5 px-5 md:px-10 text-[#212529]">
-        <h1 className="text-[28px] md:text-[34px] md:ml-14">
+      <main className="flex max-sm:mt-10 flex-col max-md:items-start max-md:justify-center max-md:p-full items-start justify-start w-full min-h-screen gap-10 px-5 md:px-10 text-[#212529]">
+        <h1 className="text-[28px] max-md:font-bold md:text-[34px] md:ml-14">
           დავალებების გვერდი
         </h1>
 
-        <div className="w-[688px] h-[44px] md:ml-14 flex justify-between rounded-[10px] border border-[#DEE2E6]">
+        <div className="w-[688px] h-[44px] max-sm:h-[88px] max-sm:top-30 max-sm:w-[288px] max-sm:flex-col md:ml-14 flex justify-between rounded-[10px] border border-[#DEE2E6]">
           {DropDowns.map(({ key, name }) => (
             <button
               key={key}
@@ -200,7 +200,7 @@ const Main: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex flex-row gap-5 ml-16">
+        <div className="flex flex-row max-md:flex-wrap gap-5 max-md:ml-0 ml-16">
           {Object.entries(selectedFilters).map(([filterKey, values]) =>
             values.map((item) => (
               <div
@@ -224,13 +224,16 @@ const Main: React.FC = () => {
               </div>
             ))
           )}
-          <button className="cursor-pointer" onClick={() => setSelectedFilters(FilteredVAl)}>
+          <button
+            className="cursor-pointer"
+            onClick={() => setSelectedFilters(FilteredVAl)}
+          >
             გასუფთავება
           </button>
         </div>
 
         {activeFilter && (
-          <div className="flex flex-col items-left w-[688px] absolute border rounded-[10px] top-[230px] py-[40px] px-[25px] border-[#8338EC] bg-white md:ml-14 gap-2">
+          <div className="flex flex-col items-left max-sm:w-[368px] w-[688px] max-md:mt-26 absolute border rounded-[10px] top-[230px] py-[40px] px-[25px] border-[#8338EC] bg-white md:ml-14 gap-2">
             {filterOptions.length > 0 ? (
               filterOptions.map((item) => (
                 <div key={item.id} className="text-black flex gap-3">
@@ -246,13 +249,12 @@ const Main: React.FC = () => {
             ) : (
               <h1>No options available...</h1>
             )}
-
           </div>
         )}
 
         <div className="flex flex-wrap md:ml-14 justify-center md:justify-start gap-5 md:gap-10 w-full">
           {Stats.map(({ name, color }) => (
-            <div key={name} className="w-full sm:w-[48%] md:w-[381px]">
+            <div key={name} className="w-full md:w-[48%] md:w-[381px]">
               <div
                 className="py-3 h-[54px] text-center text-[20px] rounded-[10px] text-white"
                 style={{ backgroundColor: color }}

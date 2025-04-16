@@ -86,7 +86,7 @@ const Registration = () => {
         mode ? "block" : "hidden"
       } flex items-center justify-center min-h-screen w-screen h-screen backdrop-blur-[3px] bg-[#5e5e5e85]`}
     >
-      <div className="flex flex-col text-[14px] text-[#343A40] justify-evenly gap-10 w-[913px] h-[766px] px-[50px] py-[60px] bg-white rounded-[10px] mx-auto">
+      <div className="flex flex-col text-[14px] text-[#343A40] justify-evenly gap-10 max-sm:w-[450px] w-[913px] max-sm:h-full h-[766px] px-[50px] py-[60px] bg-white rounded-[10px] mx-auto">
         <div
           onClick={() => dispatch(ModeSwicher())}
           className="h-[30px] w-[30px] rounded-full flex items-center justify-center cursor-pointer bg-[#DEE2E6] ml-auto"
@@ -98,14 +98,14 @@ const Registration = () => {
           თანამშრომლის დამატება
         </h1>
 
-        <div className="flex flex-row gap-[45px]">
+        <div className="ml-5 flex flex-row max-sm:flex-col gap-[45px]">
           <div className="flex flex-col gap-1">
             <label>სახელი</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUserName(e.target.value)}
-              className="p-[10px] w-[384px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+              className="p-[10px] w-[384px] max-sm:w-[300px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
             />
             {errors.username && (
               <p className="text-red-500 text-sm">{errors.username}</p>
@@ -118,7 +118,7 @@ const Registration = () => {
               type="text"
               value={surname}
               onChange={(e) => setSurName(e.target.value)}
-              className="p-[10px] w-[384px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+              className="p-[10px] w-[384px] max-sm:w-[300px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
             />
             {errors.surname && (
               <p className="text-red-500 text-sm">{errors.surname}</p>
@@ -130,14 +130,14 @@ const Registration = () => {
           <div className="flex flex-col items-center justify-center gap-3">
             <label
               htmlFor={"file"}
-              className="border-dashed cursor-pointer border-[#ac71ff] text-[#8338EC] rounded-[5px] h-[120px] flex flex-col items-center justify-center w-[813px] border-1 p-[10px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+              className="border-dashed cursor-pointer border-[#ac71ff] text-[#8338EC] rounded-[5px] h-[120px] flex flex-col items-center justify-center max-sm:w-[313px] w-[813px] border-1 p-[10px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
             >
               <img
                 src={
                   "https://img.icons8.com/?size=100&id=cDnEsiNX3cmm&format=png&color=8338EC"
                 }
                 alt="imgicon"
-                className="w-16 rounded-full h-auto"
+                className="w-16 max-sm:w-10 rounded-full h-auto"
               />
               ავატარი
             </label>
@@ -161,7 +161,7 @@ const Registration = () => {
             name="department"
             onChange={(e) => setSelectedOption(Number(e.target.value))}
             value={selectedOption ?? ""}
-            className="p-[10px] w-[384px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
+            className="p-[10px] w-[384px] max-sm:w-[300px] border-[1px] border-[#CED4DA] rounded-[6px] focus:outline-none focus:border-[1.6px] focus:border-[#afafaf]"
           >
             {errors.selectedOption && (
               <p className="text-red-500 text-sm">{errors.selectedOption}</p>
